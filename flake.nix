@@ -83,11 +83,11 @@
               };
             };
         in {
-          pine64-pinephone = mkMobileSystem "pine64-pinephone" pkgs.pkgsCross.aarch64-multiplatform;
-          llvm-pine64-pinephone = mkMobileSystem "pine64-pinephone" pkgs.pkgsCross.aarch64-multiplatform.pkgsLLVM;
+          pine64-pinephone = mkMobileSystem "pine64-pinephone" (if pkgs.hostPlatform.isAarch64 then pkgs else pkgs.pkgsCross.aarch64-multiplatform);
+          llvm-pine64-pinephone = mkMobileSystem "pine64-pinephone" (if pkgs.hostPlatform.isAarch64 then pkgs else pkgs.pkgsCross.aarch64-multiplatform).pkgsLLVM;
 
-          uefi-x86_64 = mkMobileSystem "uefi-x86_64" pkgs.pkgsCross.gnu64;
-          llvm-uefi-x86_64 = mkMobileSystem "uefi-x86_64" pkgs.pkgsCross.gnu64.pkgsLLVM;
+          uefi-x86_64 = mkMobileSystem "uefi-x86_64" (if pkgs.hostPlatform.isx86_64 then pkgs else pkgs.pkgsCross.gnu64);
+          llvm-uefi-x86_64 = mkMobileSystem "uefi-x86_64" (if pkgs.hostPlatform.isx86_64 then pkgs else pkgs.pkgsCross.gnu64).pkgsLLVM;
         };
       }));
 }
