@@ -10,6 +10,7 @@
 
     users.users.demo = {
       description = "Demo User";
+      group = "wheel";
       initialPassword = "1234";
       isNormalUser = true;
       createHome = true;
