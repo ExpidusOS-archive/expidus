@@ -35,9 +35,20 @@ in {
       upower.enable = mkDefault true;
     };
 
-    users.users.genesis-shell = {
-      isSystemUser = true;
-      uid = 198;
+    users = {
+      users.genesis-shell = {
+        isSystemUser = true;
+        uid = 198;
+        group = "genesis-shell";
+        extraGroups = [
+          "dialout"
+          "video"
+          "wheel"
+        ];
+      };
+      groups.genesis-shell = {
+        gid = 198;
+      };
     };
 
     systemd.services = {
