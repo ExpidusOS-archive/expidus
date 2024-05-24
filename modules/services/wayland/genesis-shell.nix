@@ -56,6 +56,15 @@ in {
 
         serviceConfig = {
           ExecStart = "${getExe pkgs.cage} -- ${getExe pkgs.expidus.genesis-shell} --display-manager";
+          UtmpIdentifier = "%n";
+          UtmpMode = "user";
+          TTYPath = "/dev/${tty}";
+          TTYReset = "yes";
+          TTYVHangup = "yes";
+          TTYVTDisallocate = "yes";
+          StandardInput = "tty-fail";
+          StandardOutput = "journal";
+          StandardError = "journal";
           PAMName = "genesis-shell";
         };
 
