@@ -1,8 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, options, ... }:
 with lib;
 let
   cfg = config.services.genesis-shell;
   tty = "tty${toString cfg.vt}";
+  isMobileNixOS = options ? mobile;
 in {
   options.services.genesis-shell = {
     enable = mkEnableOption "Genesis Shell";
@@ -56,6 +57,10 @@ in {
         serviceConfig = {
           ExecStart = "${getExe pkgs.cage} -- ${getExe pkgs.expidus.genesis-shell} --display-manager";
           PAMName = "genesis-shell";
+        };
+
+        environment = mkIf (isMobileNixOS && config.mobile.device.name == "pine64-pinephone") {
+          LIBGL_ALWAYS_SOFTWARE = "1";
         };
 
         restartIfChanged = false;

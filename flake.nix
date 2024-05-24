@@ -63,45 +63,34 @@
         in base // llvm;
       } // (lib.optionalAttrs (pkgs.hostPlatform.isLinux) {
         expidusConfigurations = let
-          mkMobileSystem = device: pkgs:
+          mkMobileSystem = device: pkgs: modules:
             import "${nixos-mobile}" {
               inherit (pkgs) system;
               inherit pkgs device;
 
               configuration = { config, lib, pkgs, ... }: {
-                imports = builtins.attrValues nixosModules;
-
-                config = lib.mkMerge [
-                  (lib.mkIf (device == "pine64-pinephone") {
-                    services.cage.environment.LIBGL_ALWAYS_SOFTWARE = "1";
-                  })
-                  (lib.mkIf (device == "uefi-x86_64") {
-                    mobile.boot.serialConsole = "ttyS0,115200n8";
-
-                    systemd.services."serial-getty@ttyS0" = {
-                      enable = true;
-                      wantedBy = [ "multi-user.target" ];
-                    };
-                  })
-                  (lib.mkIf (pkgs.targetPlatform.isx86_64 && !pkgs.buildPlatform.isx86_64) {
-                    environment.stub-ld.enable = lib.mkForce false;
-                  })
-                  {
-                    services.genesis-shell.enable = true;
-                    system.stateVersion = lib.version;
-                  }
-                ];
+                imports = (builtins.attrValues nixosModules) ++ [
+                  ./system/default.nix
+                ] ++ modules;
               };
             };
 
           aarch64-multiplatform = if pkgs.hostPlatform.isAarch64 then pkgs else pkgs.pkgsCross.aarch64-multiplatform;
           gnu64 = if pkgs.hostPlatform.isx86_64 then pkgs else pkgs.pkgsCross.gnu64;
-        in {
-          pine64-pinephone = mkMobileSystem "pine64-pinephone" aarch64-multiplatform;
-          llvm-pine64-pinephone = mkMobileSystem "pine64-pinephone" aarch64-multiplatform.pkgsLLVM;
 
-          uefi-x86_64 = mkMobileSystem "uefi-x86_64" gnu64;
-          llvm-uefi-x86_64 = mkMobileSystem "uefi-x86_64" gnu64.pkgsLLVM;
-        };
+          mkSystemSet = modules: {
+            pine64-pinephone = mkMobileSystem "pine64-pinephone" aarch64-multiplatform modules;
+            llvm-pine64-pinephone = mkMobileSystem "pine64-pinephone" aarch64-multiplatform.pkgsLLVM modules;
+
+            uefi-x86_64 = mkMobileSystem "uefi-x86_64" gnu64 modules;
+            llvm-uefi-x86_64 = mkMobileSystem "uefi-x86_64" gnu64.pkgsLLVM modules;
+          };
+
+          mkNamedSystemSet = name: modules:
+            lib.listToAttrs (builtins.attrValues (builtins.mapAttrs (sysname: lib.nameValuePair "${name}-${sysname}") (mkSystemSet modules)));
+        in mkSystemSet []
+          // mkNamedSystemSet "demo" [
+            ./system/demo.nix
+          ];
       }));
 }
