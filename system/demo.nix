@@ -7,5 +7,12 @@
       enable = true;
       wantedBy = [ "multi-user.target" ];
     };
+
+    users.users.demo = {
+      description = "Demo User";
+      initialPassword = "1234";
+      isNormalUser = true;
+      createHome = true;
+    };
   };
 }
