@@ -68,12 +68,15 @@
               inherit (pkgs) system;
               inherit pkgs device;
 
-              configuration = { config, lib, ... }: {
+              configuration = { config, lib, pkgs, ... }: {
                 imports = builtins.attrValues nixosModules;
 
                 config = lib.mkMerge [
                   (lib.mkIf (device == "pine64-pinephone") {
                     services.cage.environment.LIBGL_ALWAYS_SOFTWARE = "1";
+                  })
+                  (lib.mkIf (pkgs.targetPlatform.isx86_64 && !pkgs.buildPlatform.isx86_64) {
+                    environment.stub-ld.enable = lib.mkForce false;
                   })
                   {
                     services.genesis-shell.enable = true;
@@ -82,12 +85,15 @@
                 ];
               };
             };
-        in {
-          pine64-pinephone = mkMobileSystem "pine64-pinephone" (if pkgs.hostPlatform.isAarch64 then pkgs else pkgs.pkgsCross.aarch64-multiplatform);
-          llvm-pine64-pinephone = mkMobileSystem "pine64-pinephone" (if pkgs.hostPlatform.isAarch64 then pkgs else pkgs.pkgsCross.aarch64-multiplatform).pkgsLLVM;
 
-          uefi-x86_64 = mkMobileSystem "uefi-x86_64" (if pkgs.hostPlatform.isx86_64 then pkgs else pkgs.pkgsCross.gnu64);
-          llvm-uefi-x86_64 = mkMobileSystem "uefi-x86_64" (if pkgs.hostPlatform.isx86_64 then pkgs else pkgs.pkgsCross.gnu64).pkgsLLVM;
+          aarch64-multiplatform = if pkgs.hostPlatform.isAarch64 then pkgs else pkgs.pkgsCross.aarch64-multiplatform;
+          gnu64 = if pkgs.hostPlatform.isx86_64 then pkgs else pkgs.pkgsCross.gnu64;
+        in {
+          pine64-pinephone = mkMobileSystem "pine64-pinephone" aarch64-multiplatform;
+          llvm-pine64-pinephone = mkMobileSystem "pine64-pinephone" aarch64-multiplatform.pkgsLLVM;
+
+          uefi-x86_64 = mkMobileSystem "uefi-x86_64" gnu64;
+          llvm-uefi-x86_64 = mkMobileSystem "uefi-x86_64" gnu64.pkgsLLVM;
         };
       }));
 }
