@@ -35,6 +35,11 @@ in {
       upower.enable = mkDefault true;
     };
 
+    users.users.genesis-shell = {
+      isSystemUser = true;
+      uid = 198;
+    };
+
     systemd.services = {
       "autovt@${tty}".enable = false;
       genesis-shell = {
@@ -56,6 +61,7 @@ in {
 
         serviceConfig = {
           ExecStart = "${getExe pkgs.cage} -- ${getExe pkgs.expidus.genesis-shell} --display-manager";
+          User = "genesis-shell";
           UtmpIdentifier = "%n";
           UtmpMode = "user";
           TTYPath = "/dev/${tty}";
