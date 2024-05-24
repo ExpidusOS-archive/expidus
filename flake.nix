@@ -75,6 +75,14 @@
                   (lib.mkIf (device == "pine64-pinephone") {
                     services.cage.environment.LIBGL_ALWAYS_SOFTWARE = "1";
                   })
+                  (lib.mkIf (device == "uefi-x86_64") {
+                    mobile.boot.serialConsole = "ttyS0,115200n8";
+
+                    systemd.services."serial-getty@ttyS0" = {
+                      enable = true;
+                      wantedBy = [ "multi-user.target" ];
+                    };
+                  })
                   (lib.mkIf (pkgs.targetPlatform.isx86_64 && !pkgs.buildPlatform.isx86_64) {
                     environment.stub-ld.enable = lib.mkForce false;
                   })
