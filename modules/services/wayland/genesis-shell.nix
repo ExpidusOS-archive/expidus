@@ -26,6 +26,13 @@ in {
         startSession = true;
         enableGnomeKeyring = lib.mkDefault config.services.gnome.gnome-keyring.enable;
       };
+      pam.services.genesis-shell-cage.text = ''
+        auth    required pam_unix.so nullok
+        account required pam_unix.so
+        session required pam_unix.so
+        session required pam_env.so conffile=/etc/pam/environment readenv=0
+        session required ${config.systemd.package}/lib/security/pam_systemd.so
+      '';
       polkit.enable = mkDefault true;
     };
 
@@ -82,7 +89,7 @@ in {
           StandardInput = "tty-fail";
           StandardOutput = "journal";
           StandardError = "journal";
-          PAMName = "genesis-shell";
+          PAMName = "genesis-shell-cage";
         };
 
         environment = mkIf (isMobileNixOS && config.mobile.device.name == "pine64-pinephone") {
