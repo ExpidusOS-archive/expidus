@@ -7,6 +7,13 @@ let
 in {
   options.services.genesis-shell = {
     enable = mkEnableOption "Genesis Shell";
+    package = mkOption {
+      type = types.package;
+      defaultText = literalExpression "pkgs.expidus.genesis-shell";
+      description = ''
+        The package used for Genesis Shell
+      '';
+    };
     vt = mkOption {
       type = types.int;
       default = 1;
@@ -17,6 +24,7 @@ in {
   };
 
   config = mkIf cfg.enable {
+    services.genesis-shell.package = mkDefault pkgs.expidus.genesis-shell;
     hardware.opengl.enable = mkDefault true;
     programs.feedbackd.enable = mkDefault true;
 
@@ -71,7 +79,7 @@ in {
         };
 
         serviceConfig = {
-          ExecStart = "${getExe pkgs.cage} -- ${getExe pkgs.expidus.genesis-shell} --display-manager";
+          ExecStart = "${getExe pkgs.cage} -- ${getExe cfg.package} --display-manager";
           Type = "simple";
           User = "genesis-shell";
           UtmpIdentifier = "%n";
