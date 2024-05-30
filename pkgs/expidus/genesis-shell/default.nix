@@ -46,6 +46,8 @@ flutter.buildFlutterApplication {
 
   postInstall = ''
     mv $out/bin/genesis_shell $out/bin/genesis-shell
+    mv $out/app/etc $out/etc
+    mv $out/app/share $out/share
   '';
 
   meta = {
