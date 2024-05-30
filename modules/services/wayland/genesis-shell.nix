@@ -54,6 +54,7 @@ in {
           "dialout"
           "video"
           "wheel"
+          "shadow"
         ];
       };
       groups.genesis-shell = {
