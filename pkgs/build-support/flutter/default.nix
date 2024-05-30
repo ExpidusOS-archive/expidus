@@ -68,15 +68,11 @@ let
       extraPackageConfigSetup = ''
         # https://github.com/flutter/flutter/blob/3.13.8/packages/flutter_tools/lib/src/dart/pub.dart#L755
         if [ "$('${buildPackages.yq}/bin/yq' '.flutter.generate // false' pubspec.yaml)" = "true" ]; then
-          export TEMP_PACKAGES=$(mktemp)
           '${buildPackages.jq}/bin/jq' '.packages |= . + [{
             name: "flutter_gen",
             rootUri: "flutter_gen",
             languageVersion: "2.12",
-          }]' "$out" > "$TEMP_PACKAGES"
-          cp "$TEMP_PACKAGES" "$out"
-          rm "$TEMP_PACKAGES"
-          unset TEMP_PACKAGES
+          }]' "$out" | '${buildPackages.moreutils}/bin/sponge' "$out"
         fi
       '';
     };

@@ -1,7 +1,10 @@
-{ callPackage, fetchzip, fetchFromGitHub, dart, lib, stdenv }:
+{ callPackage, fetchzip, fetchFromGitHub, dart, lib, stdenv, targetPackages, pkgs }:
 let
-  mkCustomFlutter = args: callPackage ./flutter.nix args;
-  wrapFlutter = flutter: callPackage ./wrapper.nix { inherit flutter; };
+  mkCustomFlutter = args: callPackage "${pkgs.path}/pkgs/development/compilers/flutter/flutter.nix" args;
+  wrapFlutter = flutter: callPackage "${pkgs.path}/pkgs/development/compilers/flutter/wrapper.nix" {
+    inherit flutter;
+    inherit (targetPackages) atk cairo harfbuzz libepoxy pango libdeflate zlib;
+  };
   getPatches = dir:
     let files = builtins.attrNames (builtins.readDir dir);
     in if (builtins.pathExists dir) then map (f: dir + ("/" + f)) files else [ ];
@@ -19,7 +22,7 @@ let
       args = {
         inherit version engineVersion patches pubspecLock artifactHashes;
 
-        dart = let dartOverride = {
+        dart = dart.override {
           version = dartVersion;
           sources = {
             "${dartVersion}-x86_64-linux" = fetchzip {
@@ -39,7 +42,7 @@ let
               sha256 = dartHash.aarch64-darwin;
             };
           };
-        }; in dart.override dartOverride // (lib.optionalAttrs (dart ? __spliced) { __spliced = lib.mapAttrs (_: dart: dart.override dartOverride) dart.__spliced; });
+        };
         src = fetchFromGitHub {
           owner = "flutter";
           repo = "flutter";
@@ -51,20 +54,23 @@ let
     (mkCustomFlutter args).overrideAttrs (prev: next: {
       passthru = next.passthru // rec {
         inherit wrapFlutter mkCustomFlutter mkFlutter;
-        buildFlutterApplication = callPackage ../../../build-support/flutter { flutter = wrapFlutter (mkCustomFlutter args); };
+        buildFlutterApplication = callPackage ../../../build-support/flutter {
+          flutter = wrapFlutter (mkCustomFlutter args);
+          inherit (targetPackages) glib;
+        };
       };
     });
 
   flutterVersions = lib.mapAttrs'
     (version: _:
       let
-        versionDir = ./versions + "/${version}";
+        versionDir = "${pkgs.path}/pkgs/development/compilers/flutter/versions/${version}";
         data = lib.importJSON (versionDir + "/data.json");
       in
       lib.nameValuePair "v${version}" (wrapFlutter (mkFlutter ({
-        patches = (getPatches ./patches) ++ (getPatches (versionDir + "/patches"));
+        patches = (getPatches "${pkgs.path}/pkgs/development/compilers/flutter/patches") ++ (getPatches (versionDir + "/patches"));
       } // data))))
-    (builtins.readDir ./versions);
+    (builtins.readDir "${pkgs.path}/pkgs/development/compilers/flutter/versions");
 in
 flutterVersions // {
   stable = flutterVersions.${lib.last (lib.naturalSort (builtins.attrNames flutterVersions))};
