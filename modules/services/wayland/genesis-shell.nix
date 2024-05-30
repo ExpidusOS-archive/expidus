@@ -96,6 +96,7 @@ in {
           StandardError = "journal";
           PAMName = "genesis-shell";
           Restart = "on-failure";
+          AmbientCapabilities = "CAP_AUDIT_CONTROL";
         };
 
         environment = mkIf (isMobileNixOS && config.mobile.device.name == "pine64-pinephone") {
