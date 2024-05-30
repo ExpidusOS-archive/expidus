@@ -32,6 +32,8 @@ in {
       pam.services.genesis-shell = {
         allowNullPassword = true;
         startSession = true;
+        makeHomeDir = true;
+        setEnvironment = true;
         enableGnomeKeyring = lib.mkDefault config.services.gnome.gnome-keyring.enable;
       };
       polkit.enable = mkDefault true;

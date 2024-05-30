@@ -21,13 +21,13 @@
 }:
 flutter.buildFlutterApplication {
   pname = "genesis-shell";
-  version = "0-unstable-2024-05-28";
+  version = "0-unstable-2024-05-30";
 
   src = fetchFromGitHub {
     owner = "ExpidusOS";
     repo = "genesis";
-    rev = "924d856a606c66741e8f39dde20e612655a4dd34";
-    hash = "sha256-MpCM/BUW0BnGtl2mZz1O/G8ICBXMGAOMLwNW58T53+A=";
+    rev = "b5ccec5f4fb001c82308393c2cbf1614901a8a6b";
+    hash = "sha256-EFGjdN+lvB3xQ+k32hjVFDLaiQHQuCda/r3b/O2/ZgE=";
   };
 
   pubspecLock = lib.importJSON ./pubspec.lock.json;
