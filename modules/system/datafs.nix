@@ -59,12 +59,7 @@ in
         ];
       };
 
-      boot = {
-        postBootCommands = ''
-          ln -sf /data/users /home
-        '';
-        growPartition = false;
-      };
+      boot.growPartition = false;
 
       fileSystems = {
         "/" = mkForce {
@@ -76,6 +71,11 @@ in
           device = "/dev/disk/by-label/${config.mobile.generatedFilesystems.datafs.label}";
           fsType = "ext4";
           autoResize = true;
+        };
+        "/home" = mkForce {
+          device = "/data/users";
+          fsType = "bindfs";
+          options = [ "bind" ];
         };
       };
     })

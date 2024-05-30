@@ -27,6 +27,7 @@ let
       VERSION_ID = cfg.release;
       BUILD_ID = cfg.version;
       PRETTY_NAME = "${cfg.distroName} ${cfg.release} (${cfg.codeName})${optionalString (isMobileNixOS) " on ${config.mobile.device.name}"}";
+      LOGO = "expidus";
       HOME_URL = optionalString isExpidus "https://expidusos.com/";
       DOCUMENTATION_URL = optionalString isExpidus "https://wiki.expidusos.com/";
       BUG_REPORT_URL = optionalString isExpidus "https://github.com/ExpidusOS/expidus/issues";
@@ -187,29 +188,39 @@ in
 
   };
 
-  config = {
-    system.nixos = {
-      # These defaults are set here rather than up there so that
-      # changing them would not rebuild the manual
-      version = mkDefault (cfg.release + cfg.versionSuffix);
-    };
-
-    # Generate /etc/os-release.  See
-    # https://www.freedesktop.org/software/systemd/man/os-release.html for the
-    # format.
-    environment.etc = {
-      "lsb-release".text = attrsToText {
-        LSB_VERSION = "${cfg.release} (${cfg.codeName})";
-        DISTRIB_ID = "${cfg.distroId}";
-        DISTRIB_RELEASE = cfg.release;
-        DISTRIB_CODENAME = toLower cfg.codeName;
-        DISTRIB_DESCRIPTION = "${cfg.distroName} ${cfg.release} (${cfg.codeName})";
+  config = mkMerge [
+    {
+      system.nixos = {
+        # These defaults are set here rather than up there so that
+        # changing them would not rebuild the manual
+        version = mkDefault (cfg.release + cfg.versionSuffix);
       };
-      "os-release".text = attrsToText osReleaseContents;
-    };
 
-    services.getty.greetingLine = mkForce ''<<< Welcome to ${osReleaseContents.PRETTY_NAME} (\m) - \l >>>'';
-  };
+      # Generate /etc/os-release.  See
+      # https://www.freedesktop.org/software/systemd/man/os-release.html for the
+      # format.
+      environment.etc = {
+        "lsb-release".text = attrsToText {
+          LSB_VERSION = "${cfg.release} (${cfg.codeName})";
+          DISTRIB_ID = "${cfg.distroId}";
+          DISTRIB_RELEASE = cfg.release;
+          DISTRIB_CODENAME = toLower cfg.codeName;
+          DISTRIB_DESCRIPTION = "${cfg.distroName} ${cfg.release} (${cfg.codeName})";
+        };
+        "os-release".text = attrsToText osReleaseContents;
+      };
+
+      services.getty.greetingLine = mkForce ''<<< Welcome to ${osReleaseContents.PRETTY_NAME} (\m) - \l >>>'';
+    }
+    (mkIf isMobileNixOS {
+      mobile.configurationName = mkForce "expidus";
+
+      boot.postBootCommands = ''
+        mkdir -p /var/lib/expidus
+        ln -sf ${config.mobile.outputs.device-metadata}/${config.mobile.device.name}.json /var/lib/expidus/device.json
+      '';
+    })
+  ];
 
   meta.buildDocsInSandbox = false;
 }
