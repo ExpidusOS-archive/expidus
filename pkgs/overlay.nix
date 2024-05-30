@@ -1,4 +1,7 @@
 final: prev:
-{
-  expidus = prev.expidus // (prev.callPackages ./expidus {});
+rec {
+  flutterPackages = prev.callPackages ./development/compilers/flutter {};
+  flutter = flutterPackages.stable;
+
+  expidus = prev.expidus // (final.callPackages ./expidus {});
 }
