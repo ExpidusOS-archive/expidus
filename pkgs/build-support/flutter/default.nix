@@ -1,15 +1,11 @@
 { lib
 , callPackage
 , runCommand
-, makeWrapper
-, wrapGAppsHook3
 , buildDartApplication
 , cacert
 , glib
 , flutter
-, pkg-config
-, jq
-, yq
+, buildPackages
 }:
 
 # absolutely no mac support for now
@@ -39,7 +35,7 @@ let
         #
         # Instead, Flutter is patched to allow the path to the Dart binary used for
         # Pub commands to be overriden.
-        export NIX_FLUTTER_PUB_DART="${runCommand "dart-with-certs" { nativeBuildInputs = [ makeWrapper ]; } ''
+        export NIX_FLUTTER_PUB_DART="${runCommand "dart-with-certs" { nativeBuildInputs = [ buildPackages.makeWrapper ]; } ''
           mkdir -p "$out/bin"
           makeWrapper ${flutter.dart}/bin/dart "$out/bin/dart" \
             --add-flags "--root-certs-file=${cacert}/etc/ssl/certs/ca-bundle.crt"
@@ -71,9 +67,9 @@ let
 
       extraPackageConfigSetup = ''
         # https://github.com/flutter/flutter/blob/3.13.8/packages/flutter_tools/lib/src/dart/pub.dart#L755
-        if [ "$('${yq}/bin/yq' '.flutter.generate // false' pubspec.yaml)" = "true" ]; then
+        if [ "$('${buildPackages.yq}/bin/yq' '.flutter.generate // false' pubspec.yaml)" = "true" ]; then
           export TEMP_PACKAGES=$(mktemp)
-          '${jq}/bin/jq' '.packages |= . + [{
+          '${buildPackages.jq}/bin/jq' '.packages |= . + [{
             name: "flutter_gen",
             rootUri: "flutter_gen",
             languageVersion: "2.12",
@@ -88,7 +84,7 @@ let
     linux = universal // {
       outputs = universal.outputs or [ ] ++ [ "debug" ];
 
-      nativeBuildInputs = (universal.nativeBuildInputs or [ ]) ++ [
+      nativeBuildInputs = (universal.nativeBuildInputs or [ ]) ++ (with buildPackages; [
         wrapGAppsHook3
 
         # Flutter requires pkg-config for Linux desktop support, and many plugins
@@ -98,7 +94,7 @@ let
         # added here as well so the setup hook adds plugin dependencies to the
         # pkg-config search paths.
         pkg-config
-      ];
+      ]);
 
       buildInputs = (universal.buildInputs or [ ]) ++ [ glib ];
 
