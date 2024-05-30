@@ -80,6 +80,7 @@ in
           device = "/dev/disk/by-label/${config.mobile.generatedFilesystems.datafs.label}";
           fsType = "ext4";
           autoResize = true;
+          neededForBoot = true;
         };
         "/home" = mkForce {
           device = "/data/users";
