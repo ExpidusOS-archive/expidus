@@ -6,7 +6,9 @@ with lib;
       environment.stub-ld.enable = mkForce false;
     })
     {
-      security.apparmor.enable = true;
+      security.apparmor.enable = pkgs.stdenv.hostPlatform == pkgs.stdenv.buildPlatform
+        && meta.availableOn stdenv.hostPlatform pkgs.python3
+        && meta.availableOn stdenv.hostPlatform pkgs.perl;
       services.genesis-shell.enable = true;
       system.stateVersion = version;
     }
