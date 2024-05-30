@@ -7,8 +7,8 @@ with lib;
     })
     {
       security.apparmor.enable = pkgs.stdenv.hostPlatform == pkgs.stdenv.buildPlatform
-        && meta.availableOn stdenv.hostPlatform pkgs.python3
-        && meta.availableOn stdenv.hostPlatform pkgs.perl;
+        && meta.availableOn pkgs.stdenv.hostPlatform pkgs.python3
+        && meta.availableOn pkgs.stdenv.hostPlatform pkgs.perl;
       services.genesis-shell.enable = true;
       system.stateVersion = version;
     }
