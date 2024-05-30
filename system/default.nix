@@ -6,6 +6,7 @@ with lib;
       environment.stub-ld.enable = mkForce false;
     })
     {
+      security.apparmor.enable = true;
       services.genesis-shell.enable = true;
       system.stateVersion = version;
     }

@@ -34,6 +34,7 @@ in {
         startSession = true;
         makeHomeDir = true;
         setEnvironment = true;
+        enableAppArmor = config.security.apparmor.enable;
         enableGnomeKeyring = lib.mkDefault config.services.gnome.gnome-keyring.enable;
       };
       polkit.enable = mkDefault true;
