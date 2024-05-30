@@ -26,8 +26,8 @@ flutter.buildFlutterApplication {
   src = fetchFromGitHub {
     owner = "ExpidusOS";
     repo = "genesis";
-    rev = "cd5a18f6c83eded7a05f16634134e93a52222313";
-    hash = "sha256-2upufcHdoC+x8ESRond53Mmzh63RlNYecP6QqCghoCo=";
+    rev = "65d1c38a08893452734374482b95e94be4850767";
+    hash = "sha256-nacQJ5At1mbGxSyn/uOpaVWcvhcliJf5Jv7L7Cy0UHk=";
   };
 
   pubspecLock = lib.importJSON ./pubspec.lock.json;

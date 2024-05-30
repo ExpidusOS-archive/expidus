@@ -40,6 +40,7 @@ in {
     };
 
     services = {
+      dbus.packages = [ cfg.package ];
       displayManager.enable = mkDefault true;
       accounts-daemon.enable = mkDefault true;
       upower.enable = mkDefault true;
