@@ -5,8 +5,6 @@ let
   opts = options.expidus.datafs;
 
   isMobileNixOS = options ? mobile;
-
-  users = filterAttrs (name: user: user.isNormalUser && user.createHome && (hasPrefix "/home" user.home || hasPrefix "/data/users" user.home)) config.users.users;
 in
 {
   options.expidus.datafs = {
@@ -61,14 +59,7 @@ in
         ];
       };
 
-      boot = {
-        growPartition = false;
-        postBootCommands = concatStringsSep "\n" (attrValues (mapAttrs (name: user: ''
-          mkdir -p /data/users/${removePrefix (if (hasPrefix "/home" user.home) then "/home/" else "/data/users/") user.home}
-          chmod ${user.homeMode} /data/users/${removePrefix (if (hasPrefix "/home" user.home) then "/home/" else "/data/users/") user.home}
-          chown ${user.name}:${user.group} /data/users/${removePrefix (if (hasPrefix "/home" user.home) then "/home/" else "/data/users/") user.home}
-        '') users));
-      };
+      boot.growPartition = false;
 
       fileSystems = {
         "/" = mkForce {
