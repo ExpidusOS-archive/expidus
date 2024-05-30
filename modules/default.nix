@@ -1,6 +1,7 @@
+inputs:
 {
   imports = [
-    ./misc/version.nix
+    (import ./misc/version.nix inputs)
     ./services/wayland/genesis-shell.nix
     ./system/datafs.nix
   ];
