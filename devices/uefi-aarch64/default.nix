@@ -1,5 +1,6 @@
 { config, lib, pkgs, ... }:
 {
+  boot.initrd.kernelModules = [ "virtio_gpu" "virtio_pci" ];
   mobile = {
     device = {
       name = "uefi-aarch64";
@@ -106,6 +107,6 @@
       };
     };
     generatedFilesystems.boot.size = lib.mkForce (pkgs.image-builder.helpers.size.MiB 256);
-    quirks.supportsStage-0 = lib.mkDefault true;
+    quirks.supportsStage-0 = lib.mkDefault false;
   };
 }
