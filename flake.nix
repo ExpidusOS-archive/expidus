@@ -43,11 +43,7 @@
       inherit overlays nixosModules;
       lib = lib.expidus;
 
-      nixosConfigurations = lib.listToAttrs
-        (lib.flatten (builtins.attrValues (builtins.mapAttrs
-          (system: set: builtins.attrValues (builtins.mapAttrs
-            (device: lib.nameValuePair "${system}-${device}") set))
-              self.expidusConfigurations)));
+      nixosConfigurations = lib.expidus.genNixOSConfigurations self.expidusConfigurations;
     } // flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = (import nixpkgs {
@@ -69,11 +65,6 @@
           llvm = genSet "llvm" (cleanSet pkgs.pkgsLLVM.expidus);
         in base // llvm;
       } // (lib.optionalAttrs (pkgs.hostPlatform.isLinux) {
-        expidusConfigurations = let
-          inherit (lib.expidus) mkSystemSet mkNamedSystemSet;
-        in mkSystemSet pkgs []
-          // mkNamedSystemSet "demo" pkgs [
-            ./system/demo.nix
-          ];
+        expidusConfigurations = lib.expidus.genExpidusConfigurations pkgs;
       }));
 }
