@@ -25,9 +25,6 @@
       stage-1 = {
         gui.waitForDevices.enable = lib.mkDefault true;
         bootlog.enable = false;
-        earlyInitScripts = ''
-          set -x
-        '';
         kernel = {
           useNixOSKernel = lib.mkDefault true;
           additionalModules = [

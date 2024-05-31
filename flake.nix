@@ -39,7 +39,10 @@
       };
 
       nixosModules = {
-        default = import ./modules inputs;
+        default = { ... }:
+          {
+            imports = import ./modules inputs;
+          };
       };
     in {
       inherit overlays nixosModules;

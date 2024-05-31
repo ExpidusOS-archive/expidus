@@ -5,27 +5,38 @@
   ...
 }@inputs:
 lib:
+let
+  expidus-devices = (builtins.filter
+    (d: builtins.pathExists (../. + "/devices/${d}/default.nix"))
+      (builtins.attrNames (builtins.readDir ../devices)));
+  nixos-mobile-devices = (builtins.filter
+    (d: builtins.pathExists ("${nixos-mobile}/devices/${d}/default.nix"))
+      (builtins.attrNames (builtins.readDir "${nixos-mobile}/devices")));
+in
 rec {
-  all-devices =
-    let
-      expidus-devices = (builtins.filter
-        (d: builtins.pathExists (../. + "/devices/${d}/default.nix"))
-          (builtins.attrNames (builtins.readDir ../devices)));
-      nixos-mobile-devices = (builtins.filter
-        (d: builtins.pathExists ("${nixos-mobile}/devices/${d}/default.nix"))
-          (builtins.attrNames (builtins.readDir "${nixos-mobile}/devices")));
-    in nixos-mobile-devices ++ expidus-devices;
+  all-devices = nixos-mobile-devices ++ expidus-devices;
+
+  isExpidusDevice = device: (lib.lists.findFirst (item: item == device) null expidus-devices) == device;
+  isNixOSMobileDevice = device: (lib.lists.findFirst (item: item == device) null nixos-mobile-devices) == device;
+
+  getDevicePath = device:
+    if isExpidusDevice device then
+      ../. + "/devices/${device}/default.nix"
+    else if isNixOSMobileDevice device then
+      "${nixos-mobile}/devices/${device}/default.nix"
+    else throw "Unknown device ${device}";
+
+  evalConfig = import ./eval-config.nix inputs;
 
   mkMobileSystem = device: pkgs: modules:
-    import "${nixos-mobile}" {
+    evalConfig {
       inherit (pkgs) system;
-      inherit pkgs device;
+      inherit pkgs lib;
 
-      configuration = { config, lib, pkgs, ... }: {
-        imports = (builtins.attrValues self.nixosModules) ++ [
-          ../system/default.nix
-        ] ++ modules;
-      };
+      modules = modules ++ [
+        (getDevicePath device)
+        ../system/default.nix
+      ];
     };
 
   mkSystemSet = pkgs: modules:
@@ -39,15 +50,17 @@ rec {
       uefi-x86_64 = mkMobileSystem "uefi-x86_64" gnu64 modules;
       llvm-uefi-x86_64 = mkMobileSystem "uefi-x86_64" gnu64.pkgsLLVM modules;
 
-      uefi-aarch64 = mkMobileSystem ../devices/uefi-aarch64 aarch64-multiplatform modules;
-      llvm-uefi-aarch64 = mkMobileSystem ../devices/uefi-aarch64 aarch64-multiplatform.pkgsLLVM modules;
+      uefi-aarch64 = mkMobileSystem "uefi-aarch64" aarch64-multiplatform modules;
+      llvm-uefi-aarch64 = mkMobileSystem "uefi-aarch64" aarch64-multiplatform.pkgsLLVM modules;
     };
 
   mkNamedSystemSet = name: pkgs: modules:
     lib.listToAttrs (builtins.attrValues (builtins.mapAttrs (sysname: lib.nameValuePair "${name}-${sysname}") (mkSystemSet pkgs modules)));
 
   genExpidusConfigurations = pkgs:
-    mkSystemSet pkgs []
+    mkSystemSet pkgs [
+      ../system/default.nix
+    ]
       // mkNamedSystemSet "demo" pkgs [
         ../system/demo.nix
       ];
