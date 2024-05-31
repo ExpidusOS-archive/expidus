@@ -6,5 +6,6 @@ inputs:
   ./security/systemd.nix
   ./services/wayland/genesis-shell.nix
   ./system/datafs.nix
+  ./system/rootfs.nix
   ./system/users.nix
 ]

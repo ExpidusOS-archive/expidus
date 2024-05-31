@@ -20,7 +20,7 @@ in
       mobile = {
         generatedFilesystems.datafs = mkDefault {
           filesystem = "ext4";
-          label = "NIXOS_DATA";
+          label = "EXPIDUS_DATA";
           ext4.partitionID = "55555555-5555-5555-9999-999999999999";
 
           extraPadding = pkgs.image-builder.helpers.size.MiB 20;
