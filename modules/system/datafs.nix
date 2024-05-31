@@ -11,6 +11,7 @@ in
     compressLargeArtifacts = mkOption {
       type = types.bool;
       default = if isMobileNixOS then config.mobile._internal.compressLargeArtifacts else false;
+      internal = true;
     };
   };
 
