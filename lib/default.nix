@@ -58,7 +58,6 @@ rec {
 
           systemSelf = {
             legacyPackages = pkgs;
-
             packages = mkPackages systemSelf;
             devShells = mkShells systemSelf;
           } // lib.optionalAttrs (pkgs.hostPlatform.isLinux) {

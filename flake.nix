@@ -8,6 +8,7 @@
       url = "github:RossComputerGuy/mobile-nixos/fix/impure";
       flake = false;
     };
+    nixos-apple-silicon.url = "github:tpwrules/nixos-apple-silicon/1b16e4290a5e4a59c75ef53617d597e02078791e";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -16,6 +17,7 @@
     nixpkgs,
     nixos-hardware,
     nixos-mobile,
+    nixos-apple-silicon,
     flake-utils,
     ...
   }@inputs:
@@ -49,10 +51,18 @@
         pkgs = (import nixpkgs {
           inherit system;
           overlays = builtins.attrValues overlays;
-        }).extend (final: prev: {
+        }).extend (final: prev: rec {
           lib = prev.lib.extend (f: p: {
             expidus = import ./lib inputs f;
           });
+
+          isAsahi = prev.targetPlatform.isAarch64 && prev.stdenv.isLinux;
+          pkgsAsahi = if isAsahi then prev.appendOverlays [
+            nixos-apple-silicon.overlays.default
+            (f: p: {
+              mesa = p.mesa-asahi-edge;
+            })
+          ] else null;
         });
       in {
         legacyPackages = pkgs;
