@@ -20,7 +20,9 @@
     ...
   }@inputs:
     let
-      inherit (nixpkgs) lib;
+      lib = nixpkgs.lib.extend (final: prev: {
+        expidus = import ./lib inputs final;
+      });
 
       overlays = rec {
         crosspkgs = final: prev: {
@@ -39,6 +41,7 @@
       };
     in {
       inherit overlays nixosModules;
+      lib = lib.expidus;
 
       nixosConfigurations = lib.listToAttrs
         (lib.flatten (builtins.attrValues (builtins.mapAttrs
@@ -47,10 +50,14 @@
               self.expidusConfigurations)));
     } // flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs {
+        pkgs = (import nixpkgs {
           inherit system;
           overlays = builtins.attrValues overlays;
-        };
+        }).extend (final: prev: {
+          lib = prev.lib.extend (f: p: {
+            expidus = import ./lib inputs f;
+          });
+        });
       in {
         legacyPackages = pkgs;
         packages = let
@@ -63,33 +70,9 @@
         in base // llvm;
       } // (lib.optionalAttrs (pkgs.hostPlatform.isLinux) {
         expidusConfigurations = let
-          mkMobileSystem = device: pkgs: modules:
-            import "${nixos-mobile}" {
-              inherit (pkgs) system;
-              inherit pkgs device;
-
-              configuration = { config, lib, pkgs, ... }: {
-                imports = (builtins.attrValues nixosModules) ++ [
-                  ./system/default.nix
-                ] ++ modules;
-              };
-            };
-
-          aarch64-multiplatform = if pkgs.hostPlatform.isAarch64 then pkgs else pkgs.pkgsCross.aarch64-multiplatform;
-          gnu64 = if pkgs.hostPlatform.isx86_64 then pkgs else pkgs.pkgsCross.gnu64;
-
-          mkSystemSet = modules: {
-            pine64-pinephone = mkMobileSystem "pine64-pinephone" aarch64-multiplatform modules;
-            llvm-pine64-pinephone = mkMobileSystem "pine64-pinephone" aarch64-multiplatform.pkgsLLVM modules;
-
-            uefi-x86_64 = mkMobileSystem "uefi-x86_64" gnu64 modules;
-            llvm-uefi-x86_64 = mkMobileSystem "uefi-x86_64" gnu64.pkgsLLVM modules;
-          };
-
-          mkNamedSystemSet = name: modules:
-            lib.listToAttrs (builtins.attrValues (builtins.mapAttrs (sysname: lib.nameValuePair "${name}-${sysname}") (mkSystemSet modules)));
-        in mkSystemSet []
-          // mkNamedSystemSet "demo" [
+          inherit (lib.expidus) mkSystemSet mkNamedSystemSet;
+        in mkSystemSet pkgs []
+          // mkNamedSystemSet "demo" pkgs [
             ./system/demo.nix
           ];
       }));
