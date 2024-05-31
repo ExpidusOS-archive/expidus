@@ -6,6 +6,16 @@
 }@inputs:
 lib:
 rec {
+  all-devices =
+    let
+      expidus-devices = (builtins.filter
+        (d: builtins.pathExists (../. + "/devices/${d}/default.nix"))
+          (builtins.attrNames (builtins.readDir ../devices)));
+      nixos-mobile-devices = (builtins.filter
+        (d: builtins.pathExists ("${nixos-mobile}/devices/${d}/default.nix"))
+          (builtins.attrNames (builtins.readDir "${nixos-mobile}/devices")));
+    in nixos-mobile-devices ++ expidus-devices;
+
   mkMobileSystem = device: pkgs: modules:
     import "${nixos-mobile}" {
       inherit (pkgs) system;
@@ -28,6 +38,9 @@ rec {
 
       uefi-x86_64 = mkMobileSystem "uefi-x86_64" gnu64 modules;
       llvm-uefi-x86_64 = mkMobileSystem "uefi-x86_64" gnu64.pkgsLLVM modules;
+
+      uefi-aarch64 = mkMobileSystem ../devices/uefi-aarch64 aarch64-multiplatform modules;
+      llvm-uefi-aarch64 = mkMobileSystem ../devices/uefi-aarch64 aarch64-multiplatform.pkgsLLVM modules;
     };
 
   mkNamedSystemSet = name: pkgs: modules:
