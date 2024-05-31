@@ -97,7 +97,7 @@
         ];
       };
     };
-
+    generatedFilesystems.boot.size = lib.mkForce (pkgs.image-builder.helpers.size.MiB 256);
     quirks.supportsStage-0 = lib.mkDefault true;
   };
 }
