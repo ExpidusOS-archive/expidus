@@ -14,8 +14,8 @@ in
       mobile = {
         beautification.splash = mkForce true;
         boot.stage-1 = {
-          kernel.logo.logo = mkForce ./logo.svg;
-          gui.logo = mkForce ./logo.svg;
+          kernel.logo.logo = mkForce ./logo2.svg;
+          gui.logo = mkForce ./logo2.svg;
         };
       };
 
