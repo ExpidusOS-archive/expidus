@@ -26,8 +26,8 @@ flutter.buildFlutterApplication {
   src = fetchFromGitHub {
     owner = "ExpidusOS";
     repo = "genesis";
-    rev = "65d1c38a08893452734374482b95e94be4850767";
-    hash = "sha256-nacQJ5At1mbGxSyn/uOpaVWcvhcliJf5Jv7L7Cy0UHk=";
+    rev = "ce327bc7dcf3fd9556361ca703f3162cf88ae207";
+    hash = "sha256-L4OnLcsD7ymUFSG0YVwP+xcowlDoucsyi8ZZe5nVlKo=";
   };
 
   pubspecLock = lib.importJSON ./pubspec.lock.json;
@@ -40,8 +40,8 @@ flutter.buildFlutterApplication {
   ];
 
   gitHashes = {
-    libtokyo = "sha256-Zn30UmppXnzhs+t+EQNwAhaTPjCCxoN0a+AbH6bietg=";
-    libtokyo_flutter = "sha256-Zn30UmppXnzhs+t+EQNwAhaTPjCCxoN0a+AbH6bietg=";
+    libtokyo = "sha256-ei3bgEdmmWz0iwMUBzBndYPlvNiCrDBrG33/n8PrBPI=";
+    libtokyo_flutter = "sha256-ei3bgEdmmWz0iwMUBzBndYPlvNiCrDBrG33/n8PrBPI=";
   };
 
   postInstall = ''

@@ -24,8 +24,11 @@ in {
   };
 
   config = mkIf cfg.enable {
-    services.genesis-shell.package = mkDefault pkgs.expidus.genesis-shell;
-    hardware.opengl.enable = mkDefault true;
+    hardware = {
+      opengl.enable = mkDefault true;
+      sensor.iio.enable = mkDefault true;
+    };
+
     programs.feedbackd.enable = mkDefault true;
 
     security = {
@@ -41,9 +44,11 @@ in {
     };
 
     services = {
+      genesis-shell.package = mkDefault pkgs.expidus.genesis-shell;
       dbus.packages = [ cfg.package ];
       displayManager.enable = mkDefault true;
       accounts-daemon.enable = mkDefault true;
+      homed.enable = mkDefault true;
       upower.enable = mkDefault true;
     };
 
