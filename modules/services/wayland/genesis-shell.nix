@@ -4,6 +4,8 @@ let
   cfg = config.services.genesis-shell;
   tty = "tty${toString cfg.vt}";
   isMobileNixOS = options ? mobile;
+
+  commandArgs = optional cfg.displayManager "--display-manager";
 in {
   options.services.genesis-shell = {
     enable = mkEnableOption "Genesis Shell";
@@ -21,9 +23,28 @@ in {
         The virtual console (tty) that greetd should use. This option also disables getty on that tty.
       '';
     };
+    displayManager = (mkEnableOption "Genesis Shell's display manager") // { default = true; };
+    user = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      description = ''
+        The user to run Genesis Shell as, only has an effect when the display manager option is disabled.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = !cfg.displayManager -> cfg.user != null;
+        message = "Cannot run Genesis Shell as a specific user without disabling the display manager feature.";
+      }
+      {
+        assertion = cfg.displayManager -> cfg.user == null;
+        message = "When running Genesis Shell with the display manager feature disabled, a user must be specified.";
+      }
+    ];
+
     hardware = {
       opengl.enable = mkDefault true;
       sensor.iio.enable = mkDefault true;
@@ -52,7 +73,7 @@ in {
       upower.enable = mkDefault true;
     };
 
-    users = {
+    users = mkIf (!cfg.displayManager) {
       users.genesis-shell = {
         isSystemUser = true;
         uid = 198;
@@ -89,9 +110,9 @@ in {
         };
 
         serviceConfig = {
-          ExecStart = "${getExe pkgs.cage} -- ${getExe cfg.package} --display-manager";
+          ExecStart = "${getExe pkgs.cage} -- ${getExe cfg.package} ${concatStringsSep " " commandArgs}";
           Type = "simple";
-          User = "genesis-shell";
+          User = if cfg.displayManager then "genesis-shell" else cfg.user;
           UtmpIdentifier = "%n";
           UtmpMode = "user";
           TTYPath = "/dev/${tty}";
