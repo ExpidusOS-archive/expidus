@@ -8,7 +8,10 @@
       url = "github:RossComputerGuy/mobile-nixos/fix/impure";
       flake = false;
     };
-    nixos-apple-silicon.url = "github:tpwrules/nixos-apple-silicon/1b16e4290a5e4a59c75ef53617d597e02078791e";
+    nixos-apple-silicon = {
+      url = "github:tpwrules/nixos-apple-silicon/1b16e4290a5e4a59c75ef53617d597e02078791e";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -51,10 +54,7 @@
       nixosConfigurations = lib.expidus.genNixOSConfigurations self.expidusConfigurations;
     } // flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = (import nixpkgs {
-          inherit system;
-          overlays = builtins.attrValues overlays;
-        }).extend (final: prev: rec {
+        pkgs = (nixpkgs.legacyPackages.${system}.appendOverlays (builtins.attrValues overlays)).extend (final: prev: rec {
           lib = prev.lib.extend (f: p: {
             expidus = import ./lib inputs f;
           });
