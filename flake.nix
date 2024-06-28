@@ -2,14 +2,14 @@
   description = "The easy to use mobile and desktop operating system from Midstall Software";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs";
     nixos-hardware.url = "github:NixOS/nixos-hardware";
     nixos-mobile = {
       url = "github:RossComputerGuy/mobile-nixos/fix/impure";
       flake = false;
     };
     nixos-apple-silicon = {
-      url = "github:tpwrules/nixos-apple-silicon/1b16e4290a5e4a59c75ef53617d597e02078791e";
+      url = "github:tpwrules/nixos-apple-silicon/b0a2376f6c164a0af963d47386c064cc6fdcd5ea";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     flake-utils.url = "github:numtide/flake-utils";
